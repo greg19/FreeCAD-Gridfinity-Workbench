@@ -7,7 +7,7 @@ on:
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
-    container: ruudjhuu/freecad:v1.0.0
+    container: ruudjhuu/freecad:v1.0.0-2
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -15,12 +15,8 @@ jobs:
         run: python -m unittest discover tests -v
   freecad-tests:
     runs-on: ubuntu-latest
-    container: ruudjhuu/freecad:v1.0.0
+    container: ruudjhuu/freecad:v1.0.0-2
     steps:
-      - name: Install X environment
-        run: |
-          pacman --noconfirm -Syu
-          pacman --noconfirm -S xorg-server-xvfb
       - name: Check out code
         uses: actions/checkout@v3
       - name: Add workbench to FreeCAD
@@ -30,4 +26,6 @@ jobs:
       - name: Run freecad tests
         run: xvfb-run freecad -t freecad.gridfinity_workbench.test_gridfinity 2>&1 | tee output.txt
       - name: Check caught exceptions
+        # FreeCAD catches exceptions during command invocation and only shows them in GUI, exiting with 0
+        # This makes the some tests pass when they shouldn't, so we look for the exceptions here
         run: "! grep -B 1 Traceback output.txt"
